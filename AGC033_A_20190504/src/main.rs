@@ -118,53 +118,52 @@ fn solve(src: String) -> String {
         board: [chars; h],
     }
 
+    let mut queue: VecDeque<(usize, usize)> = VecDeque::new();
     let mut board = board;
     let mut next_board = board.clone();
     let mut checked = vec![vec![false; w]; h]; //std::vec::Vec<std::vec::Vec<bool>>;
 
+    for i in 0..h {
+        for j in 0..w {
+            if board[i][j] == '#' {
+                queue.push_back((i, j));
+            }
+        }
+    }
+
+    let mut queue_length = queue.len();
     let mut counter = 0;
     loop {
-        let mut exist_white = false;
-        for i in 0..h {
-            for j in 0..w {
-                if board[i][j] == '.' {
-                    exist_white = true;
-                }
+        for _ in 0..queue_length {
+            let (i, j) = queue.pop_front().unwrap();
+            if board[i][j] != '#' || checked[i][j] {
+                continue;
             }
-            debug!(board[i]);
+            if i > 0 && board[i - 1][j] == '.' {
+                board[i - 1][j] = '#';
+                queue.push_back((i - 1, j));
+            }
+            if i < h - 1 && board[i + 1][j] == '.' {
+                board[i + 1][j] = '#';
+                queue.push_back((i + 1, j));
+            }
+            if j > 0 && board[i][j - 1] == '.' {
+                board[i][j - 1] = '#';
+                queue.push_back((i, j - 1));
+            }
+            if j < w - 1 && board[i][j + 1] == '.' {
+                board[i][j + 1] = '#';
+                queue.push_back((i, j + 1));
+            }
         }
-        if !exist_white {
-            break;
+        queue_length = queue.len();
+        if queue_length == 0 {
+            result.push_str(&counter.to_string());
+            result.push_str("\n");
+            return result;
         }
-
         counter += 1;
-        for i in 0..h {
-            for j in 0..w {
-                if board[i][j] != '#' || checked[i][j] {
-                    continue;
-                }
-                if i > 0 {
-                    next_board[i - 1][j] = '#'
-                }
-                if i < h - 1 {
-                    next_board[i + 1][j] = '#'
-                }
-                if j > 0 {
-                    next_board[i][j - 1] = '#'
-                }
-                if j < w - 1 {
-                    next_board[i][j + 1] = '#'
-                }
-                checked[i][j] = true;
-            }
-        }
-
-        board = next_board.clone();
-        debug!("-------------");
     }
-    result.push_str(&counter.to_string());
-    result.push_str("\n");
-    return result;
 }
 
 #[test]
