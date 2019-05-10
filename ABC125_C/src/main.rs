@@ -127,23 +127,35 @@ fn solve(src: String) -> String {
 
     debug!(n);
     debug!(a);
-    let mut gcds = Vec::new();
-    for i in 0..n {
-        let mut g = if i == 0 { a[1] } else { a[0] };
-        for j in 0..n {
-            if j == i {
-                continue;
-            }
-            g = gcd(g, a[j]);
-        }
-        gcds.push(g);
+    let mut left_accumulated_gcds = vec![0; n];
+    let mut right_accumulated_gcds = vec![0; n];
+    left_accumulated_gcds[0] = a[0];
+    for i in 1..n {
+        left_accumulated_gcds[i] = gcd(left_accumulated_gcds[i - 1], a[i]);
     }
+    right_accumulated_gcds[n - 1] = a[n - 1];
+    for i in (0..n - 1).rev() {
+        right_accumulated_gcds[i] = gcd(right_accumulated_gcds[i + 1], a[i]);
+    }
+    debug!(left_accumulated_gcds);
+    debug!(right_accumulated_gcds);
 
-    debug!(gcds);
-    if let Some(max) = gcds.iter().max() {
-        result.push_str(&max.to_string());
-        result.push_str("\n");
+    let mut max = 0;
+    for i in 0..n {
+        let x = if i == 0 {
+            right_accumulated_gcds[1]
+        } else if i == n - 1 {
+            left_accumulated_gcds[n - 2]
+        } else {
+            gcd(left_accumulated_gcds[i - 1], right_accumulated_gcds[i + 1])
+        };
+        if x > max {
+            max = x
+        }
     }
+    debug!(max);
+    result.push_str(&max.to_string());
+    result.push_str("\n");
     result
 }
 
